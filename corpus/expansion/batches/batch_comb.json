@@ -1,0 +1,58 @@
+[
+ {
+  "name": "rca8",
+  "interface": "module rca8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);",
+  "golden_rtl": "module rca8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);\n  assign {cout, sum} = a + b + cin;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; reg cin; wire [7:0] sum; wire cout;\n  reg [8:0] exp; integer i,seed;\n  rca8 dut(.a(a),.b(b),.cin(cin),.sum(sum),.cout(cout));\n  initial begin\n    seed=7;\n    for(i=0;i<3000;i=i+1) begin\n      a=$random(seed); b=$random(seed); cin=$random(seed);\n      #1;\n      exp = {1'b0,a} + {1'b0,b} + cin;\n      if({cout,sum} !== exp) begin\n        $display(\"FAIL a=%0d b=%0d cin=%0d got=%0d exp=%0d\",a,b,cin,{cout,sum},exp); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module rca8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);\n  assign {cout, sum} = a + b;\nendmodule\n"
+ },
+ {
+  "name": "mux4",
+  "interface": "module mux4 (input [3:0] d, input [1:0] sel, output y);",
+  "golden_rtl": "module mux4 (input [3:0] d, input [1:0] sel, output y);\n  assign y = d[sel];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [3:0] d; reg [1:0] sel; wire y; integer i,seed;\n  mux4 dut(.d(d),.sel(sel),.y(y));\n  initial begin\n    seed=11;\n    for(i=0;i<3000;i=i+1) begin\n      d=$random(seed); sel=$random(seed);\n      #1;\n      if(y !== d[sel]) begin\n        $display(\"FAIL d=%b sel=%0d y=%b exp=%b\",d,sel,y,d[sel]); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module mux4 (input [3:0] d, input [1:0] sel, output y);\n  assign y = d[{sel[0],sel[1]}];\nendmodule\n"
+ },
+ {
+  "name": "prio_enc8",
+  "interface": "module prio_enc8 (input [7:0] req, output [2:0] idx, output valid);",
+  "golden_rtl": "module prio_enc8 (input [7:0] req, output [2:0] idx, output valid);\n  assign valid = |req;\n  assign idx = req[7] ? 3'd7 : req[6] ? 3'd6 : req[5] ? 3'd5 : req[4] ? 3'd4 :\n               req[3] ? 3'd3 : req[2] ? 3'd2 : req[1] ? 3'd1 : 3'd0;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] req; wire [2:0] idx; wire valid;\n  integer i,k,seed; reg exp_valid; integer exp_idx;\n  prio_enc8 dut(.req(req),.idx(idx),.valid(valid));\n  initial begin\n    seed=23;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<10) req=i[7:0]; else req=$random(seed);\n      #1;\n      exp_valid = |req;\n      exp_idx = 0;\n      for(k=0;k<8;k=k+1) if(req[k]) exp_idx = k;\n      if(valid !== exp_valid) begin\n        $display(\"FAIL req=%b valid=%b exp_valid=%b\",req,valid,exp_valid); $finish;\n      end\n      if(exp_valid && (idx !== exp_idx[2:0])) begin\n        $display(\"FAIL req=%b idx=%0d exp_idx=%0d\",req,idx,exp_idx); $finish;\n      end\n      if(exp_valid && (req[idx] !== 1'b1)) begin\n        $display(\"FAIL req=%b idx=%0d not set\",req,idx); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module prio_enc8 (input [7:0] req, output [2:0] idx, output valid);\n  assign valid = |req;\n  assign idx = req[0] ? 3'd0 : req[1] ? 3'd1 : req[2] ? 3'd2 : req[3] ? 3'd3 :\n               req[4] ? 3'd4 : req[5] ? 3'd5 : req[6] ? 3'd6 : 3'd7;\nendmodule\n"
+ },
+ {
+  "name": "dec3to8",
+  "interface": "module dec3to8 (input [2:0] a, input en, output [7:0] y);",
+  "golden_rtl": "module dec3to8 (input [2:0] a, input en, output [7:0] y);\n  assign y = en ? (8'b1 << a) : 8'b0;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [2:0] a; reg en; wire [7:0] y; integer i,k,seed,cnt;\n  dec3to8 dut(.a(a),.en(en),.y(y));\n  initial begin\n    seed=31;\n    for(i=0;i<3000;i=i+1) begin\n      a=$random(seed); en=$random(seed);\n      #1;\n      cnt=0; for(k=0;k<8;k=k+1) cnt=cnt+y[k];\n      if(en) begin\n        if(cnt !== 1) begin $display(\"FAIL a=%0d en=1 y=%b not onehot\",a,y); $finish; end\n        if(y[a] !== 1'b1) begin $display(\"FAIL a=%0d en=1 y=%b wrong bit\",a,y); $finish; end\n      end else begin\n        if(y !== 8'b0) begin $display(\"FAIL a=%0d en=0 y=%b should be 0\",a,y); $finish; end\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module dec3to8 (input [2:0] a, input en, output [7:0] y);\n  assign y = 8'b1 << a;\nendmodule\n"
+ },
+ {
+  "name": "magcmp8",
+  "interface": "module magcmp8 (input [7:0] a, input [7:0] b, output lt, output eq, output gt);",
+  "golden_rtl": "module magcmp8 (input [7:0] a, input [7:0] b, output lt, output eq, output gt);\n  assign lt = (a < b);\n  assign eq = (a == b);\n  assign gt = (a > b);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire lt,eq,gt; integer i,seed;\n  magcmp8 dut(.a(a),.b(b),.lt(lt),.eq(eq),.gt(gt));\n  initial begin\n    seed=41;\n    for(i=0;i<3000;i=i+1) begin\n      a=$random(seed); b=$random(seed);\n      if(i[0]) b=a;\n      #1;\n      if((lt+eq+gt) !== 1) begin $display(\"FAIL a=%0d b=%0d not exactly one: lt=%b eq=%b gt=%b\",a,b,lt,eq,gt); $finish; end\n      if(lt !== (a<b)) begin $display(\"FAIL lt a=%0d b=%0d lt=%b\",a,b,lt); $finish; end\n      if(eq !== (a==b)) begin $display(\"FAIL eq a=%0d b=%0d eq=%b\",a,b,eq); $finish; end\n      if(gt !== (a>b)) begin $display(\"FAIL gt a=%0d b=%0d gt=%b\",a,b,gt); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module magcmp8 (input [7:0] a, input [7:0] b, output lt, output eq, output gt);\n  assign lt = (a < b);\n  assign eq = (a == b);\n  assign gt = (a >= b);\nendmodule\n"
+ },
+ {
+  "name": "barrel_rol8",
+  "interface": "module barrel_rol8 (input [7:0] din, input [2:0] sh, output [7:0] dout);",
+  "golden_rtl": "module barrel_rol8 (input [7:0] din, input [2:0] sh, output [7:0] dout);\n  assign dout = (din << sh) | (din >> (8 - sh));\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] din; reg [2:0] sh; wire [7:0] dout;\n  reg [7:0] exp; integer i,k,seed;\n  barrel_rol8 dut(.din(din),.sh(sh),.dout(dout));\n  initial begin\n    seed=53;\n    for(i=0;i<3000;i=i+1) begin\n      din=$random(seed); sh=$random(seed);\n      #1;\n      exp = din;\n      for(k=0;k<sh;k=k+1) exp = {exp[6:0], exp[7]};\n      if(dout !== exp) begin\n        $display(\"FAIL din=%b sh=%0d dout=%b exp=%b\",din,sh,dout,exp); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module barrel_rol8 (input [7:0] din, input [2:0] sh, output [7:0] dout);\n  assign dout = din << sh;\nendmodule\n"
+ },
+ {
+  "name": "bin2gray8",
+  "interface": "module bin2gray8 (input [7:0] bin, output [7:0] gray);",
+  "golden_rtl": "module bin2gray8 (input [7:0] bin, output [7:0] gray);\n  assign gray = bin ^ (bin >> 1);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] bin; wire [7:0] gray;\n  reg [7:0] exp, gprev; reg have_prev; integer i,k,seed,hd; reg [7:0] diff;\n  bin2gray8 dut(.bin(bin),.gray(gray));\n  initial begin\n    seed=61; have_prev=0; gprev=0;\n    for(i=0;i<512;i=i+1) begin\n      bin = i[7:0];\n      #1;\n      exp = bin ^ (bin >> 1);\n      if(gray !== exp) begin $display(\"FAIL bin=%0d gray=%b exp=%b\",bin,gray,exp); $finish; end\n      if(have_prev && (i<256)) begin\n        diff = gray ^ gprev; hd=0;\n        for(k=0;k<8;k=k+1) hd=hd+diff[k];\n        if(hd !== 1) begin $display(\"FAIL adjacency bin=%0d hd=%0d\",bin,hd); $finish; end\n      end\n      gprev = gray; have_prev = 1;\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module bin2gray8 (input [7:0] bin, output [7:0] gray);\n  assign gray = bin ^ (bin << 1);\nendmodule\n"
+ },
+ {
+  "name": "popcount8",
+  "interface": "module popcount8 (input [7:0] x, output [3:0] cnt);",
+  "golden_rtl": "module popcount8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6]+x[7];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [3:0] cnt; integer i,k,seed; reg [3:0] exp;\n  popcount8 dut(.x(x),.cnt(cnt));\n  initial begin\n    seed=73;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp=0; for(k=0;k<8;k=k+1) exp=exp+x[k];\n      if(cnt !== exp) begin $display(\"FAIL x=%b cnt=%0d exp=%0d\",x,cnt,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module popcount8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6];\nendmodule\n"
+ }
+]

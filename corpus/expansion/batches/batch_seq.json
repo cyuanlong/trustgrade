@@ -1,0 +1,58 @@
+[
+ {
+  "name": "updown_counter",
+  "interface": "module ud_cnt (input clk, input rst_n, input up, output reg [3:0] q);",
+  "golden_rtl": "module ud_cnt(input clk, input rst_n, input up, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'd0; else q<= up ? q+4'd1 : q-4'd1; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n,up; wire [3:0] q; integer i; reg [3:0] exp; ud_cnt dut(.clk(clk),.rst_n(rst_n),.up(up),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; up=0; exp=0; @(posedge clk); #1; rst_n=1; for(i=0;i<80;i=i+1) begin up=$random; @(posedge clk); #1; exp= up ? exp+4'd1 : exp-4'd1; if(q!==exp) begin $display(\"FAIL cyc=%0d up=%b q=%0d exp=%0d\",i,up,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module ud_cnt(input clk, input rst_n, input up, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'd0; else q<= q+4'd1; endmodule"
+ },
+ {
+  "name": "mod10_cnt",
+  "interface": "module mod10 (input clk, input rst_n, output reg [3:0] q);",
+  "golden_rtl": "module mod10(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'd0; else q<= (q==4'd9)?4'd0:q+4'd1; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n; wire [3:0] q; integer i; reg [3:0] exp; mod10 dut(.clk(clk),.rst_n(rst_n),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; exp=0; @(posedge clk); #1; rst_n=1; for(i=0;i<60;i=i+1) begin @(posedge clk); #1; exp=(exp==4'd9)?4'd0:exp+4'd1; if(q>4'd9) begin $display(\"FAIL cyc=%0d out-of-range q=%0d\",i,q); $finish; end if(q!==exp) begin $display(\"FAIL cyc=%0d q=%0d exp=%0d\",i,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module mod10(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'd0; else q<= q+4'd1; endmodule"
+ },
+ {
+  "name": "shift_sipo",
+  "interface": "module sipo (input clk, input rst_n, input din, output reg [7:0] q);",
+  "golden_rtl": "module sipo(input clk, input rst_n, input din, output reg [7:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=8'd0; else q<= {q[6:0], din}; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n,din; wire [7:0] q; integer i; reg [7:0] exp; sipo dut(.clk(clk),.rst_n(rst_n),.din(din),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; din=0; exp=0; @(posedge clk); #1; rst_n=1; for(i=0;i<80;i=i+1) begin din=$random; @(posedge clk); #1; exp={exp[6:0], din}; if(q!==exp) begin $display(\"FAIL cyc=%0d din=%b q=%b exp=%b\",i,din,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module sipo(input clk, input rst_n, input din, output reg [7:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=8'd0; else q<= {din, q[7:1]}; endmodule"
+ },
+ {
+  "name": "lfsr4",
+  "interface": "module lfsr4 (input clk, input rst_n, output reg [3:0] q);",
+  "golden_rtl": "module lfsr4(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0001; else q<= {q[2:0], q[3]^q[2]}; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n; wire [3:0] q; integer i; reg [3:0] exp; lfsr4 dut(.clk(clk),.rst_n(rst_n),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; exp=4'b0001; @(posedge clk); #1; rst_n=1; for(i=0;i<45;i=i+1) begin @(posedge clk); #1; exp={exp[2:0], exp[3]^exp[2]}; if(q===4'd0) begin $display(\"FAIL cyc=%0d LFSR hit zero (non-maximal)\",i); $finish; end if(q!==exp) begin $display(\"FAIL cyc=%0d q=%b exp=%b\",i,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module lfsr4(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0001; else q<= {q[2:0], q[3]^q[0]}; endmodule"
+ },
+ {
+  "name": "edge_det",
+  "interface": "module edge_det (input clk, input rst_n, input sig, output reg pulse);",
+  "golden_rtl": "module edge_det(input clk, input rst_n, input sig, output reg pulse); reg prev; always @(posedge clk or negedge rst_n) if(!rst_n) begin prev<=1'b0; pulse<=1'b0; end else begin pulse<= sig & ~prev; prev<= sig; end endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n,sig; wire pulse; integer i; reg prev_s, exp; edge_det dut(.clk(clk),.rst_n(rst_n),.sig(sig),.pulse(pulse)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; sig=0; prev_s=0; exp=0; @(posedge clk); #1; rst_n=1; for(i=0;i<80;i=i+1) begin sig=$random; @(posedge clk); #1; exp= sig & ~prev_s; prev_s= sig; if(pulse!==exp) begin $display(\"FAIL cyc=%0d sig=%b pulse=%b exp=%b\",i,sig,pulse,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module edge_det(input clk, input rst_n, input sig, output reg pulse); reg prev; always @(posedge clk or negedge rst_n) if(!rst_n) begin prev<=1'b0; pulse<=1'b0; end else begin pulse<= sig; prev<= sig; end endmodule"
+ },
+ {
+  "name": "ring_cnt",
+  "interface": "module ring_cnt (input clk, input rst_n, output reg [3:0] q);",
+  "golden_rtl": "module ring_cnt(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0001; else q<= {q[2:0], q[3]}; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n; wire [3:0] q; integer i; reg [3:0] exp; ring_cnt dut(.clk(clk),.rst_n(rst_n),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; exp=4'b0001; @(posedge clk); #1; rst_n=1; for(i=0;i<40;i=i+1) begin @(posedge clk); #1; exp={exp[2:0], exp[3]}; if((q & (q-1))!==4'd0 || q===4'd0) begin $display(\"FAIL cyc=%0d not one-hot q=%b\",i,q); $finish; end if(q!==exp) begin $display(\"FAIL cyc=%0d q=%b exp=%b\",i,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module ring_cnt(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0001; else q<= {q[0], q[3:1]}; endmodule"
+ },
+ {
+  "name": "johnson_cnt",
+  "interface": "module johnson_cnt (input clk, input rst_n, output reg [3:0] q);",
+  "golden_rtl": "module johnson_cnt(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0000; else q<= {q[2:0], ~q[3]}; endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n; wire [3:0] q; integer i; reg [3:0] exp; johnson_cnt dut(.clk(clk),.rst_n(rst_n),.q(q)); initial clk=0; always #5 clk=~clk; initial begin rst_n=0; exp=4'b0000; @(posedge clk); #1; rst_n=1; for(i=0;i<40;i=i+1) begin @(posedge clk); #1; exp={exp[2:0], ~exp[3]}; if(q!==exp) begin $display(\"FAIL cyc=%0d q=%b exp=%b\",i,q,exp); $finish; end end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module johnson_cnt(input clk, input rst_n, output reg [3:0] q); always @(posedge clk or negedge rst_n) if(!rst_n) q<=4'b0000; else q<= {q[2:0], q[3]}; endmodule"
+ },
+ {
+  "name": "gray_cnt",
+  "interface": "module gray_cnt (input clk, input rst_n, output reg [3:0] g);",
+  "golden_rtl": "module gray_cnt(input clk, input rst_n, output reg [3:0] g); reg [3:0] bin; always @(posedge clk or negedge rst_n) if(!rst_n) begin bin<=4'd0; g<=4'd0; end else begin bin<=bin+4'd1; g<= (bin+4'd1) ^ ((bin+4'd1)>>1); end endmodule",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb; reg clk,rst_n; wire [3:0] g; integer i; reg [3:0] bexp; reg [3:0] gexp, gprev; gray_cnt dut(.clk(clk),.rst_n(rst_n),.g(g)); initial clk=0; always #5 clk=~clk; function integer popcnt; input [3:0] v; integer k; begin popcnt=0; for(k=0;k<4;k=k+1) popcnt=popcnt+v[k]; end endfunction initial begin rst_n=0; bexp=0; gprev=0; @(posedge clk); #1; rst_n=1; for(i=0;i<40;i=i+1) begin @(posedge clk); #1; bexp=bexp+4'd1; gexp= bexp ^ (bexp>>1); if(g!==gexp) begin $display(\"FAIL cyc=%0d g=%b exp=%b\",i,g,gexp); $finish; end if(popcnt(g ^ gprev)!==1) begin $display(\"FAIL cyc=%0d non-gray transition %b->%b\",i,gprev,g); $finish; end gprev=g; end $display(\"PASS\"); $finish; end initial begin #200000; $display(\"FAIL timeout\"); $finish; end endmodule",
+  "buggy_rtl": "module gray_cnt(input clk, input rst_n, output reg [3:0] g); reg [3:0] bin; always @(posedge clk or negedge rst_n) if(!rst_n) begin bin<=4'd0; g<=4'd0; end else begin bin<=bin+4'd1; g<= (bin+4'd1); end endmodule"
+ }
+]

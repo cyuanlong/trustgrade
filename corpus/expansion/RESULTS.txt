@@ -1,0 +1,40 @@
+PAPER-A CORPUS RUN — property grading vs similarity baselines on construction-based ground truth
+====================================================================================================
+objectives=31  submissions=152  (VALID=88 [alt=58], BUGGY=64)
+
+objectives=31  submissions=152  REF-OUT auto-harness coverage=31/31 objectives
+
+grader       | FNR (reject valid)     FPR (accept buggy)     FNR on alternatives 
+----------------------------------------------------------------------------------------------------
+PROP         |  0/88  = 0.00           2/64  = 0.03           0/58  = 0.00
+REF-OUT      |  1/88  = 0.01           3/64  = 0.05           1/58  = 0.02
+TEXT-SIM     |  1/88  = 0.01          64/64  = 1.00           1/58  = 0.02
+STRUCT-SIM   |  1/88  = 0.01          62/64  = 0.97           1/58  = 0.02
+----------------------------------------------------------------------------------------------------
+similarity-to-golden distribution (parameter-free overlap argument):
+  TEXT-SIM   valid-alternatives: min=0.76 med=1.00 max=1.00   |   buggy: min=0.84 med=0.96 max=1.00
+  STRUCT-SIM valid-alternatives: min=0.70 med=1.00 max=1.00   |   buggy: min=0.67 med=0.98 max=1.00
+  -> if valid-alt range overlaps buggy range, NO threshold separates them: similarity is unfit as a grader.
+====================================================================================================
+PROP disagreements w/ construction GT (expert-study candidates): 0 valid-rejected, 2 buggy-accepted
+   [buggy->ACCEPT] clkdiv6_tick       inj_const_+1
+   [buggy->ACCEPT] lifo_stack         inj_const_+1
+
+saved corpus_results.json
+
+============================================================================================
+EXPANSION CORPUS — grader comparison  (31 objectives, 152 submissions:
+  VALID=88 [alternatives=58], BUGGY=64)
+============================================================================================
+grader                   FNR valid          FNR alt            FPR buggy          Fisher vs PROP (FPR)
+--------------------------------------------------------------------------------------------
+Property (ours)           0/88 [0.00,0.04]   0/58 [0.00,0.06]   2/64 [0.01,0.11]  
+Reference-output match    1/88 [0.00,0.06]   1/58 [0.00,0.09]   3/64 [0.02,0.13]  p=1.00e+00
+Token similarity          1/88 [0.00,0.06]   1/58 [0.00,0.09]  64/64 [0.94,1.00]  p=9.14e-13
+Structural similarity     1/88 [0.00,0.06]   1/58 [0.00,0.09]  62/64 [0.89,0.99]  p=9.49e-13
+--------------------------------------------------------------------------------------------
+BACKBONE (full execution gate) on the expansion corpus:
+  sound-verdict accuracy : 149/149 [0.975,1.000]
+  buggy caught (sound)   : 62/64
+  valid delivered ACCEPT : 87/88   (rest -> UNCERTAIN escalation, not rejection)
+  escalated to human     : 3/152
