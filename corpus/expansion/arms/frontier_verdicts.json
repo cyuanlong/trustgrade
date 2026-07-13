@@ -1,0 +1,610 @@
+[
+{
+"id": "bus_sync2__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "bus_sync2__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "clkdiv6_tick__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "clkdiv6_tick__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "accum_sum__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "accum_sum__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "mac_sat__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "mac_sat__inj_rel_>to<",
+"verdict": "REJECT"
+},
+{
+"id": "runmax__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "gray_counter__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_counter__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "rca8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "mux4__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "prio_enc8__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "dec3to8__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "magcmp8__inj_rel_>to<",
+"verdict": "REJECT"
+},
+{
+"id": "bin2gray8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "popcount8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "seq_detect_1011__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "req_ack_handshake__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "req_ack_handshake__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "traffic_light__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "uart_tx__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "lifo_stack__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "lifo_stack__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "sync_fifo4__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "sync_fifo4__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "vending_change__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "updown_counter__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "mod10_cnt__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "mod10_cnt__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "shift_sipo__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "lfsr4__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "edge_det__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "ring_cnt__provided_bug",
+"verdict": "APPROVE"
+},
+{
+"id": "johnson_cnt__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "gray_cnt__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_cnt__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "bus_sync2__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "bitrev8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "clkdiv6_tick__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "clkdiv6_tick__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "accum_sum__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "accum_sum__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "mac_sat__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "mac_sat__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "runmax__inj_rel_>to<",
+"verdict": "REJECT"
+},
+{
+"id": "gray_counter__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_counter__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "rca8__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "prio_enc8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "dec3to8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "magcmp8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "barrel_rol8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "bin2gray8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "popcount8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "seq_detect_1011__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "req_ack_handshake__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "traffic_light__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "uart_tx__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "uart_tx__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "lifo_stack__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "lifo_stack__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "sync_fifo4__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "sync_fifo4__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "vending_change__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "updown_counter__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "mod10_cnt__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "shift_sipo__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "lfsr4__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "edge_det__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "edge_det__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "ring_cnt__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "johnson_cnt__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "bus_sync2__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "bitrev8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "clkdiv6_tick__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "clkdiv6_tick__inj_const_+1",
+"verdict": "APPROVE"
+},
+{
+"id": "accum_sum__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "mac_sat__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "mac_sat__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "runmax__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "runmax__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "gray_counter__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "rca8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "mux4__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "prio_enc8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "dec3to8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "magcmp8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "barrel_rol8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "bin2gray8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "popcount8__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "seq_detect_1011__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "req_ack_handshake__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "traffic_light__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "uart_tx__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "uart_tx__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "lifo_stack__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "lifo_stack__inj_const_+1",
+"verdict": "APPROVE"
+},
+{
+"id": "sync_fifo4__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "vending_change__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "vending_change__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "updown_counter__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "mod10_cnt__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "shift_sipo__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "lfsr4__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "edge_det__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "ring_cnt__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "johnson_cnt__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_cnt__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_cnt__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "rr_arbiter__alt_token",
+"verdict": "APPROVE"
+},
+{
+"id": "bus_sync2__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "bitrev8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "clkdiv6_tick__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "accum_sum__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "accum_sum__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "mac_sat__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "mac_sat__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "runmax__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_counter__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_counter__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "rca8__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "mux4__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "prio_enc8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "dec3to8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "magcmp8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "barrel_rol8__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "popcount8__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "seq_detect_1011__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "seq_detect_1011__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "req_ack_handshake__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "traffic_light__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "uart_tx__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "uart_tx__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "lifo_stack__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "sync_fifo4__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "sync_fifo4__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "vending_change__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "updown_counter__golden",
+"verdict": "APPROVE"
+},
+{
+"id": "updown_counter__inj_const_+1",
+"verdict": "REJECT"
+},
+{
+"id": "mod10_cnt__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "shift_sipo__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "lfsr4__provided_bug",
+"verdict": "REJECT"
+},
+{
+"id": "edge_det__variant_rename0",
+"verdict": "APPROVE"
+},
+{
+"id": "ring_cnt__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "johnson_cnt__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_cnt__variant_reformat",
+"verdict": "APPROVE"
+},
+{
+"id": "gray_cnt__inj_arith_+to-",
+"verdict": "REJECT"
+},
+{
+"id": "rr_arbiter__starvation",
+"verdict": "REJECT"
+},
+{
+"id": "gray_cnt__variant_rename1",
+"verdict": "APPROVE"
+},
+{
+"id": "rr_arbiter__alt_pointer",
+"verdict": "APPROVE"
+}
+]

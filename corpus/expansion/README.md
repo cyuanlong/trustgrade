@@ -55,3 +55,29 @@ Backbone (full execution gate): sound-verdict accuracy **149/149**, buggy caught
 accepted). Similarity grading again accepts essentially every buggy submission
 at any threshold; the property grader's only residual is the property-coverage
 gap the differential layer is designed to close.
+
+## Full six-arm gate comparison (all three paid LLM arms actually run)
+
+Framed as a faulty-feedback corpus — 152 proposed "fixes" (88 valid OK, 64 broken
+incl. 2 property-evaders) — and judged by all six paradigms. The DeepSeek review
+and simulated-student arms were run against the public API; the frontier-review
+arm was run by Claude reviewers doing static review only (no execution). Scored
+by `score_expansion.py`; verdicts archived under `arms/`.
+
+| Gating condition | Catch broken (64) | Pass valid (88) | Evaders (2) | Harmful delivered | McNemar vs full |
+|---|---|---|---|---|---|
+| Ungated | 0/64 | 88/88 | 0/2 | 64 | b=64,c=1, p=3.6e-18 |
+| Simulated student | 16/64 | 66/88 | 1/2 | 48 | b=70,c=1, p=6.1e-20 |
+| Affordable review (DeepSeek) | 51/64 | 83/88 | 1/2 | 13 | b=18,c=1, p=7.6e-05 |
+| Frontier review (Claude) | 61/64 | 88/88 | 0/2 | 3 | b=3,c=1, **p=0.62** |
+| Test-only execution | 62/64 | 88/88 | 0/2 | 2 | b=2,c=1, p=1.0 |
+| **Full execution gate (ours)** | **64/64** | 87/88 | **2/2** | **0** | — |
+
+The primary corpus's ordering replicates on this independent, fully-public
+benchmark: the full gate delivers **zero** harmful fixes and catches both
+property-evaders via the L2 differential layer; it is statistically
+indistinguishable from frontier review (p=0.62) while being deterministic and
+free, and significantly safer than affordable review, the simulated-student
+paradigm, and ungated delivery (all p ≤ 8e-5). Reproduce the LLM arms with
+`DEEPSEEK_API_KEY=... python run_ds_arms_expansion.py` (the key is read from the
+environment and never stored).
