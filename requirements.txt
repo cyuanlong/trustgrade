@@ -1,0 +1,5 @@
+# The backbone / gate / scaffold / stats need only the Python standard library
+# and Icarus Verilog (iverilog, vvp) on PATH — install that separately.
+# These are for the tests and the figure generators only.
+pytest>=7.0
+matplotlib>=3.6

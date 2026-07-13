@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# simulator scratch
+*.vvp
+*.vcd
+tg_assess_*/
+tg_scaffold_*/
+
+# API keys / secrets — never commit
+.env
+*.key
+
+# corpus (release on acceptance; not redistributable)
+data/corpus/
+data/verdicts/
