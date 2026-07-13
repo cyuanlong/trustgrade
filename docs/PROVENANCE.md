@@ -26,12 +26,28 @@ evaluation corpus.
 | The 37-objective corpus, the 221-item ground-truth submissions, and the 222-item faulty-feedback corpus | Derived from course assignments; governed by the same non-redistribution constraints as coursework. Released on acceptance per the manuscript's *Data and code availability* statement. The arbiter objective is included here in full as a worked example. |
 | The frozen per-item verdicts of the six arms (used to compute the §5.4 tables) | Products of running the arms over that corpus (the deterministic arms with Icarus Verilog; the LLM arms with API calls). Re-derivable from the corpus + `arms.py`. |
 
-## Reconstruction note
+## The original harness — recovered
 
 The experimental harness that produced the paper's numbers was authored in a
-working scratch space that was not preserved. The code in `src/` is a faithful
-re-implementation of the **published** algorithms and interfaces — not a copy of
-that harness — and is verified to reproduce the algorithms' behaviour on the
-worked example end-to-end. Where a number in the paper depends on the private
-corpus or on model calls, this note says so rather than implying the repo
-regenerates it bit-for-bit.
+working scratch space that was later cleared. It was **recovered verbatim from
+the session transcript** (every file write went through a recorded tool call) and
+re-verified to compile; it now lives in [`../experiment/`](../experiment) exactly
+as it was run. That is the authoritative research code:
+
+| Path | What it is |
+|---|---|
+| `experiment/corpus_run.py` | corpus builder + the four graders + all shared primitives (compile/simulate, variant generators, alpha-equivalence, mutation injectors, differential oracle) |
+| `experiment/trustgrade.py` | the assessment backbone (`assess` = L0/L1/L2), Module 1 |
+| `experiment/tutor_gate2.py` | the feedback gate of §4.3 (full-backbone fix contract) |
+| `experiment/scaffold_validate.py` | Module 2, verified scaffolding (s1–s3) |
+| `experiment/build_gate_xl.py`, `run_exec_arms_xl.py`, `run_ds_arms_xl.py`, `score_gatexl.py` | the 222-item six-arm comparison, end to end |
+| `experiment/paper_stats.py` | Wilson CIs, exact McNemar, Fisher exact |
+| `experiment/slice_grader.py`, `build_submissions.py`, `diag_metric.py`, `score_judge.py`, `characterize.py` | the arbiter vertical slice and supporting analyses |
+
+`src/trustgrade/` is a **cleaned, packaged, unit-tested library version** of the
+same algorithms with a self-contained arbiter demo that runs without the corpus;
+`experiment/` is the as-run original. They agree on the algorithms by
+construction. What the original harness needs but this repo does not yet ship —
+the course-derived corpus JSONs (`hard_tasks.json`, `arb_bundle.json`,
+`tutor_outputs.json`, `scaffolds.json`) — is listed in
+[`../experiment/README.md`](../experiment/README.md) and releases on acceptance.

@@ -43,7 +43,12 @@ they can be run on byte-identical items.
 ## Repository layout
 
 ```
-src/trustgrade/
+experiment/        the ORIGINAL evaluation harness, as run — the code that
+                   produced the paper's results (corpus_run.py + trustgrade.py +
+                   the gate, the scaffold validator, the six-arm runners, and
+                   paper_stats.py). Research-grade; see experiment/README.md.
+src/trustgrade/    a cleaned, packaged, unit-tested library version of the same
+                   algorithms, with a demo that runs without the corpus:
   backbone.py      ASSESS — L0/L1/L2 executing verifier (Algorithm 1)
   gate.py          GATE   — C1 + C2 feedback gate      (Algorithm 2)
   scaffold.py      VALIDATE-SCAFFOLD                    (Algorithm 3)
@@ -59,7 +64,7 @@ tests/             pytest suite (backbone, gate, scaffold, statistics)
 prompts/           Appendix A prompts as standalone files
 manuscript/        the manuscript (EN + zh), figures embedded
 figures/           fig1–fig8, 300 dpi PNG + PDF
-docs/              claims audit (evidence table for every literature claim)
+docs/              claims audit + PROVENANCE (what is self-contained vs corpus-dependent)
 ```
 
 ## Installation
@@ -122,9 +127,12 @@ gate itself is model-free.
 
 ## Reproducibility & provenance
 
-This repository provides the **framework and system**: a runnable implementation
-of the published algorithms plus the paper's running example, prompts, figures,
-manuscript, and a full evidence audit of every literature claim (`docs/`).
+This repository provides **both** the original evaluation harness (`experiment/`,
+the code that produced the paper's results, recovered verbatim from the session
+transcript and re-verified to compile) **and** a cleaned, unit-tested library
+version (`src/trustgrade/`) with a self-contained demo — plus the paper's running
+example, prompts, figures, manuscript, and a full evidence audit of every
+literature claim (`docs/`).
 
 Two honest caveats about the paper's *headline numbers*:
 

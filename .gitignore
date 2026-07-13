@@ -19,3 +19,9 @@ tg_scaffold_*/
 # corpus (release on acceptance; not redistributable)
 data/corpus/
 data/verdicts/
+
+# experiment/ runtime scratch + generated artifacts (regenerate by running the pipeline)
+experiment/_corpus_run/
+experiment/*_results.json
+experiment/corpus_cache.json
+experiment/gatexl_exec_verdicts.json
