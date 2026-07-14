@@ -1,0 +1,7 @@
+MBPP corpus: 478 candidates (300 correct, 178 buggy)
+arm                        catch buggy        pass correct       harmful  vs exec-gate
+--------------------------------------------------------------------------------------------
+Execution gate (ours)      178/178[0.98,1.00] 300/300[0.99,1.00]    0    —
+Token similarity             1/178[0.00,0.03] 300/300[0.99,1.00]  177    b=177,c=0,p=1e-53
+DeepSeek judge             168/178[0.90,0.97] 171/300[0.51,0.62]   10    b=139,c=0,p=2.9e-42
+Claude judge (frontier)    178/178[0.98,1.00] 299/300[0.98,1.00]    0    b=1,c=0,p=1
