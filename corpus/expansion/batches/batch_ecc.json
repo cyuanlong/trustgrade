@@ -1,0 +1,72 @@
+[
+ {
+  "name": "even_parity8",
+  "interface": "module even_parity8 (input [7:0] data, output p);",
+  "golden_rtl": "module even_parity8 (input [7:0] data, output p);\n  assign p = ^data;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] data; wire p; integer i,seed;\n  even_parity8 dut(.data(data),.p(p));\n  initial begin\n    seed=101;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) data=i[7:0]; else data=$random(seed);\n      #1;\n      if((^{data,p}) !== 1'b0) begin\n        $display(\"FAIL data=%b p=%b total-ones not even\",data,p); $finish;\n      end\n      if(p !== (^data)) begin\n        $display(\"FAIL data=%b p=%b exp=%b\",data,p,^data); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module even_parity8 (input [7:0] data, output p);\n  assign p = ~(^data);\nendmodule\n"
+ },
+ {
+  "name": "odd_parity8",
+  "interface": "module odd_parity8 (input [7:0] data, output p);",
+  "golden_rtl": "module odd_parity8 (input [7:0] data, output p);\n  assign p = ~(^data);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] data; wire p; integer i,seed;\n  odd_parity8 dut(.data(data),.p(p));\n  initial begin\n    seed=113;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) data=i[7:0]; else data=$random(seed);\n      #1;\n      if((^{data,p}) !== 1'b1) begin\n        $display(\"FAIL data=%b p=%b total-ones not odd\",data,p); $finish;\n      end\n      if(p !== ~(^data)) begin\n        $display(\"FAIL data=%b p=%b exp=%b\",data,p,~(^data)); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module odd_parity8 (input [7:0] data, output p);\n  assign p = ^data;\nendmodule\n"
+ },
+ {
+  "name": "parity_chk8",
+  "interface": "module parity_chk8 (input [7:0] data, input parity, output err);",
+  "golden_rtl": "module parity_chk8 (input [7:0] data, input parity, output err);\n  assign err = (^data) ^ parity;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] data; reg parity; wire err; integer i,seed; reg exp;\n  parity_chk8 dut(.data(data),.parity(parity),.err(err));\n  initial begin\n    seed=127;\n    for(i=0;i<3000;i=i+1) begin\n      data=$random(seed);\n      if(i[0]) parity = ^data; else parity=$random(seed);\n      #1;\n      exp = (^data) ^ parity;\n      if(err !== exp) begin\n        $display(\"FAIL data=%b parity=%b err=%b exp=%b\",data,parity,err,exp); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module parity_chk8 (input [7:0] data, input parity, output err);\n  assign err = ^data;\nendmodule\n"
+ },
+ {
+  "name": "hamming74_enc",
+  "interface": "module hamming74_enc (input [3:0] d, output [6:0] code);",
+  "golden_rtl": "module hamming74_enc (input [3:0] d, output [6:0] code);\n  wire p1 = d[0] ^ d[1] ^ d[3];\n  wire p2 = d[0] ^ d[2] ^ d[3];\n  wire p4 = d[1] ^ d[2] ^ d[3];\n  assign code[0] = p1;\n  assign code[1] = p2;\n  assign code[2] = d[0];\n  assign code[3] = p4;\n  assign code[4] = d[1];\n  assign code[5] = d[2];\n  assign code[6] = d[3];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [3:0] d; wire [6:0] code; integer i; reg s1,s2,s4; reg [3:0] ext;\n  hamming74_enc dut(.d(d),.code(code));\n  initial begin\n    for(i=0;i<16;i=i+1) begin\n      d=i[3:0];\n      #1;\n      s1 = code[0]^code[2]^code[4]^code[6];\n      s2 = code[1]^code[2]^code[5]^code[6];\n      s4 = code[3]^code[4]^code[5]^code[6];\n      if((s1!==1'b0)||(s2!==1'b0)||(s4!==1'b0)) begin\n        $display(\"FAIL d=%b code=%b syndrome=%b%b%b nonzero\",d,code,s4,s2,s1); $finish;\n      end\n      ext = {code[6],code[5],code[4],code[2]};\n      if(ext !== d) begin\n        $display(\"FAIL d=%b code=%b extracted=%b\",d,code,ext); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module hamming74_enc (input [3:0] d, output [6:0] code);\n  wire p1 = d[0] ^ d[1] ^ d[3];\n  wire p2 = d[0] ^ d[2];\n  wire p4 = d[1] ^ d[2] ^ d[3];\n  assign code[0] = p1;\n  assign code[1] = p2;\n  assign code[2] = d[0];\n  assign code[3] = p4;\n  assign code[4] = d[1];\n  assign code[5] = d[2];\n  assign code[6] = d[3];\nendmodule\n"
+ },
+ {
+  "name": "hamming74_dec",
+  "interface": "module hamming74_dec (input [6:0] code, output [3:0] data, output [2:0] syndrome);",
+  "golden_rtl": "module hamming74_dec (input [6:0] code, output [3:0] data, output [2:0] syndrome);\n  wire s1 = code[0]^code[2]^code[4]^code[6];\n  wire s2 = code[1]^code[2]^code[5]^code[6];\n  wire s4 = code[3]^code[4]^code[5]^code[6];\n  assign syndrome = {s4,s2,s1};\n  wire [6:0] corr = (syndrome==3'd0) ? code : (code ^ (7'b1 << (syndrome-1)));\n  assign data = {corr[6],corr[5],corr[4],corr[2]};\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [6:0] code; wire [3:0] data; wire [2:0] syndrome;\n  integer di,e; reg [3:0] d; reg p1,p2,p4; reg [6:0] base;\n  hamming74_dec dut(.code(code),.data(data),.syndrome(syndrome));\n  initial begin\n    for(di=0;di<16;di=di+1) begin\n      d=di[3:0];\n      p1 = d[0]^d[1]^d[3];\n      p2 = d[0]^d[2]^d[3];\n      p4 = d[1]^d[2]^d[3];\n      base[0]=p1; base[1]=p2; base[2]=d[0]; base[3]=p4;\n      base[4]=d[1]; base[5]=d[2]; base[6]=d[3];\n      for(e=0;e<8;e=e+1) begin\n        if(e==0) code=base; else code = base ^ (7'b1 << (e-1));\n        #1;\n        if(syndrome !== e[2:0]) begin\n          $display(\"FAIL d=%b err_pos=%0d syndrome=%0d exp=%0d\",d,e,syndrome,e); $finish;\n        end\n        if(data !== d) begin\n          $display(\"FAIL d=%b err_pos=%0d data=%b (uncorrected)\",d,e,data); $finish;\n        end\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module hamming74_dec (input [6:0] code, output [3:0] data, output [2:0] syndrome);\n  wire s1 = code[0]^code[2]^code[4]^code[6];\n  wire s2 = code[1]^code[2]^code[5]^code[6];\n  wire s4 = code[3]^code[4]^code[5]^code[6];\n  assign syndrome = {s1,s2,s4};\n  wire [6:0] corr = (syndrome==3'd0) ? code : (code ^ (7'b1 << (syndrome-1)));\n  assign data = {corr[6],corr[5],corr[4],corr[2]};\nendmodule\n"
+ },
+ {
+  "name": "crc8_byte",
+  "interface": "module crc8_byte (input [7:0] data, input [7:0] crc_in, output [7:0] crc_out);",
+  "golden_rtl": "module crc8_byte (input [7:0] data, input [7:0] crc_in, output reg [7:0] crc_out);\n  integer i; reg fb; reg [7:0] c;\n  always @* begin\n    c = crc_in;\n    for(i=7;i>=0;i=i-1) begin\n      fb = c[7] ^ data[i];\n      c = c << 1;\n      if(fb) c = c ^ 8'h07;\n    end\n    crc_out = c;\n  end\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] data, crc_in; wire [7:0] crc_out;\n  integer i,k,seed; reg fb; reg [7:0] c;\n  crc8_byte dut(.data(data),.crc_in(crc_in),.crc_out(crc_out));\n  initial begin\n    seed=131;\n    for(i=0;i<3000;i=i+1) begin\n      data=$random(seed); crc_in=$random(seed);\n      #1;\n      c = crc_in;\n      for(k=7;k>=0;k=k-1) begin\n        fb = c[7] ^ data[k];\n        c = c << 1;\n        if(fb) c = c ^ 8'h07;\n      end\n      if(crc_out !== c) begin\n        $display(\"FAIL data=%h crc_in=%h crc_out=%h exp=%h\",data,crc_in,crc_out,c); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module crc8_byte (input [7:0] data, input [7:0] crc_in, output reg [7:0] crc_out);\n  integer i; reg fb; reg [7:0] c;\n  always @* begin\n    c = crc_in;\n    for(i=7;i>=0;i=i-1) begin\n      fb = c[7];\n      c = c << 1;\n      if(fb) c = c ^ 8'h07;\n    end\n    crc_out = c;\n  end\nendmodule\n"
+ },
+ {
+  "name": "ones_checksum",
+  "interface": "module ones_checksum (input [7:0] a, input [7:0] b, output [7:0] chk);",
+  "golden_rtl": "module ones_checksum (input [7:0] a, input [7:0] b, output [7:0] chk);\n  wire [8:0] s1 = a + b;\n  wire [8:0] s2 = s1[7:0] + s1[8];\n  wire [7:0] folded = s2[7:0] + s2[8];\n  assign chk = ~folded;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire [7:0] chk; integer i,seed; reg [7:0] t;\n  ones_checksum dut(.a(a),.b(b),.chk(chk));\n  function [7:0] ocs;\n    input [7:0] x, y; reg [8:0] u;\n    begin\n      u = x + y;\n      u = {1'b0,u[7:0]} + u[8];\n      ocs = u[7:0] + u[8];\n    end\n  endfunction\n  initial begin\n    seed=137;\n    for(i=0;i<3000;i=i+1) begin\n      if(i==0) begin a=8'hFF; b=8'hFF; end\n      else if(i==1) begin a=8'hFF; b=8'h01; end\n      else if(i==2) begin a=8'h00; b=8'h00; end\n      else begin a=$random(seed); b=$random(seed); end\n      #1;\n      t = ocs(ocs(a,b), chk);\n      if(t !== 8'hFF) begin\n        $display(\"FAIL a=%h b=%h chk=%h ocsum-with-chk=%h (exp FF)\",a,b,chk,t); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module ones_checksum (input [7:0] a, input [7:0] b, output [7:0] chk);\n  assign chk = ~(a + b);\nendmodule\n"
+ },
+ {
+  "name": "maj3",
+  "interface": "module maj3 (input a, input b, input c, output y);",
+  "golden_rtl": "module maj3 (input a, input b, input c, output y);\n  assign y = (a & b) | (a & c) | (b & c);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg a,b,c; wire y; integer i; reg exp;\n  maj3 dut(.a(a),.b(b),.c(c),.y(y));\n  initial begin\n    for(i=0;i<8;i=i+1) begin\n      {a,b,c} = i[2:0];\n      #1;\n      exp = ((a+b+c) >= 2) ? 1'b1 : 1'b0;\n      if(y !== exp) begin\n        $display(\"FAIL a=%b b=%b c=%b y=%b exp=%b\",a,b,c,y,exp); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module maj3 (input a, input b, input c, output y);\n  assign y = a & b & c;\nendmodule\n"
+ },
+ {
+  "name": "gray_valid8",
+  "interface": "module gray_valid8 (input [7:0] a, input [7:0] b, output valid);",
+  "golden_rtl": "module gray_valid8 (input [7:0] a, input [7:0] b, output valid);\n  wire [7:0] d = a ^ b;\n  wire [3:0] cnt = d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7];\n  assign valid = (cnt == 4'd1);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire valid; integer i,k,seed; reg [7:0] d; reg [3:0] cnt; reg exp;\n  gray_valid8 dut(.a(a),.b(b),.valid(valid));\n  initial begin\n    seed=139;\n    for(i=0;i<3000;i=i+1) begin\n      a=$random(seed);\n      case(i%4)\n        0: b = a;\n        1: b = a ^ (8'b1 << (i%8));\n        2: b = a ^ 8'b0000_0011;\n        default: b = $random(seed);\n      endcase\n      #1;\n      d = a ^ b; cnt=0;\n      for(k=0;k<8;k=k+1) cnt = cnt + d[k];\n      exp = (cnt == 4'd1);\n      if(valid !== exp) begin\n        $display(\"FAIL a=%b b=%b valid=%b exp=%b cnt=%0d\",a,b,valid,exp,cnt); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module gray_valid8 (input [7:0] a, input [7:0] b, output valid);\n  wire [7:0] d = a ^ b;\n  assign valid = |d;\nendmodule\n"
+ },
+ {
+  "name": "hamdist8",
+  "interface": "module hamdist8 (input [7:0] a, input [7:0] b, output [3:0] hd);",
+  "golden_rtl": "module hamdist8 (input [7:0] a, input [7:0] b, output [3:0] hd);\n  wire [7:0] d = a ^ b;\n  assign hd = d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire [3:0] hd; integer i,k,seed; reg [7:0] d; reg [3:0] exp;\n  hamdist8 dut(.a(a),.b(b),.hd(hd));\n  initial begin\n    seed=149;\n    for(i=0;i<3000;i=i+1) begin\n      a=$random(seed);\n      if(i[0]) b=a; else b=$random(seed);\n      #1;\n      d = a ^ b; exp=0;\n      for(k=0;k<8;k=k+1) exp = exp + d[k];\n      if(hd !== exp) begin\n        $display(\"FAIL a=%b b=%b hd=%0d exp=%0d\",a,b,hd,exp); $finish;\n      end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module hamdist8 (input [7:0] a, input [7:0] b, output [3:0] hd);\n  wire [7:0] d = a ^ b;\n  assign hd = d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6];\nendmodule\n"
+ }
+]

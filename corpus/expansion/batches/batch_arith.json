@@ -1,0 +1,72 @@
+[
+ {
+  "name": "umul8",
+  "interface": "module umul8 (input [7:0] a, input [7:0] b, output [15:0] p);",
+  "golden_rtl": "module umul8 (input [7:0] a, input [7:0] b, output [15:0] p);\n  assign p = a * b;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire [15:0] p; reg [15:0] exp; integer i,seed;\n  umul8 dut(.a(a),.b(b),.p(p));\n  initial begin\n    seed=101;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: begin a=8'd255; b=8'd255; end\n        1: begin a=8'd255; b=8'd128; end\n        2: begin a=8'd0;   b=8'd255; end\n        3: begin a=8'd200; b=8'd200; end\n        default: begin a=$random(seed); b=$random(seed); end\n      endcase\n      #1;\n      exp = a * b;\n      if(p !== exp) begin $display(\"FAIL a=%0d b=%0d p=%0d exp=%0d\",a,b,p,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module umul8 (input [7:0] a, input [7:0] b, output [15:0] p);\n  assign p = a * (b & 8'h7f);\nendmodule\n"
+ },
+ {
+  "name": "smul8",
+  "interface": "module smul8 (input signed [7:0] a, input signed [7:0] b, output signed [15:0] p);",
+  "golden_rtl": "module smul8 (input signed [7:0] a, input signed [7:0] b, output signed [15:0] p);\n  assign p = a * b;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg signed [7:0] a,b; wire signed [15:0] p; reg signed [15:0] exp; integer i,seed;\n  smul8 dut(.a(a),.b(b),.p(p));\n  initial begin\n    seed=103;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: begin a=-8'sd128; b=-8'sd128; end\n        1: begin a=-8'sd128; b= 8'sd127; end\n        2: begin a= 8'sd127; b= 8'sd127; end\n        3: begin a=-8'sd1;   b= 8'sd1;   end\n        4: begin a=-8'sd1;   b=-8'sd1;   end\n        default: begin a=$random(seed); b=$random(seed); end\n      endcase\n      #1;\n      exp = a * b;\n      if(p !== exp) begin $display(\"FAIL a=%0d b=%0d p=%0d exp=%0d\",a,b,p,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module smul8 (input signed [7:0] a, input signed [7:0] b, output signed [15:0] p);\n  assign p = $unsigned(a) * $unsigned(b);\nendmodule\n"
+ },
+ {
+  "name": "divrestore4",
+  "interface": "module divrestore4 (input [3:0] a, input [3:0] b, output reg [3:0] q, output reg [3:0] r);",
+  "golden_rtl": "module divrestore4 (input [3:0] a, input [3:0] b, output reg [3:0] q, output reg [3:0] r);\n  integer i; reg [4:0] rem; reg [3:0] quo; reg [4:0] diff;\n  always @(*) begin\n    rem = 5'd0; quo = a;\n    for(i=0;i<4;i=i+1) begin\n      rem = {rem[3:0], quo[3]};\n      quo = {quo[2:0], 1'b0};\n      diff = rem - {1'b0, b};\n      if(diff[4] == 1'b0) begin rem = diff; quo[0] = 1'b1; end\n    end\n    q = quo; r = rem[3:0];\n  end\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [3:0] a,b; wire [3:0] q,r; integer ta,tb_i; reg [3:0] eq,er;\n  divrestore4 dut(.a(a),.b(b),.q(q),.r(r));\n  initial begin\n    for(ta=0;ta<16;ta=ta+1)\n      for(tb_i=1;tb_i<16;tb_i=tb_i+1) begin\n        a = ta[3:0]; b = tb_i[3:0];\n        #1;\n        eq = ta / tb_i; er = ta % tb_i;\n        if(q !== eq || r !== er) begin $display(\"FAIL a=%0d b=%0d q=%0d r=%0d expq=%0d expr=%0d\",a,b,q,r,eq,er); $finish; end\n        if(r >= b) begin $display(\"FAIL remainder too large a=%0d b=%0d r=%0d\",a,b,r); $finish; end\n      end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module divrestore4 (input [3:0] a, input [3:0] b, output reg [3:0] q, output reg [3:0] r);\n  integer i; reg [4:0] rem; reg [3:0] quo; reg [4:0] diff;\n  always @(*) begin\n    rem = 5'd0; quo = a;\n    for(i=0;i<4;i=i+1) begin\n      rem = {rem[3:0], quo[3]};\n      quo = {quo[2:0], 1'b0};\n      diff = rem - {1'b0, b};\n      rem = diff;\n      if(diff[4] == 1'b0) quo[0] = 1'b1;\n    end\n    q = quo; r = rem[3:0];\n  end\nendmodule\n"
+ },
+ {
+  "name": "cla8",
+  "interface": "module cla8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);",
+  "golden_rtl": "module cla8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);\n  wire [7:0] g = a & b;\n  wire [7:0] p = a ^ b;\n  wire [8:0] c;\n  assign c[0] = cin;\n  assign c[1] = g[0] | (p[0] & c[0]);\n  assign c[2] = g[1] | (p[1] & c[1]);\n  assign c[3] = g[2] | (p[2] & c[2]);\n  assign c[4] = g[3] | (p[3] & c[3]);\n  assign c[5] = g[4] | (p[4] & c[4]);\n  assign c[6] = g[5] | (p[5] & c[5]);\n  assign c[7] = g[6] | (p[6] & c[6]);\n  assign c[8] = g[7] | (p[7] & c[7]);\n  assign sum = p ^ c[7:0];\n  assign cout = c[8];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; reg cin; wire [7:0] sum; wire cout; reg [8:0] exp; integer i,seed;\n  cla8 dut(.a(a),.b(b),.cin(cin),.sum(sum),.cout(cout));\n  initial begin\n    seed=107;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: begin a=8'h80; b=8'h80; cin=1'b0; end\n        1: begin a=8'hFF; b=8'h01; cin=1'b0; end\n        2: begin a=8'hFF; b=8'hFF; cin=1'b1; end\n        3: begin a=8'h00; b=8'h00; cin=1'b0; end\n        default: begin a=$random(seed); b=$random(seed); cin=$random(seed); end\n      endcase\n      #1;\n      exp = {1'b0,a} + {1'b0,b} + cin;\n      if({cout,sum} !== exp) begin $display(\"FAIL a=%0d b=%0d cin=%0d got=%0d exp=%0d\",a,b,cin,{cout,sum},exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module cla8 (input [7:0] a, input [7:0] b, input cin, output [7:0] sum, output cout);\n  wire [7:0] g = a & b;\n  wire [7:0] p = a ^ b;\n  wire [8:0] c;\n  assign c[0] = cin;\n  assign c[1] = g[0] | (p[0] & c[0]);\n  assign c[2] = g[1] | (p[1] & c[1]);\n  assign c[3] = g[2] | (p[2] & c[2]);\n  assign c[4] = g[3] | (p[3] & c[3]);\n  assign c[5] = g[4] | (p[4] & c[4]);\n  assign c[6] = g[5] | (p[5] & c[5]);\n  assign c[7] = g[6] | (p[6] & c[6]);\n  assign c[8] = g[7] | (p[7] & c[7]);\n  assign sum = p ^ c[7:0];\n  assign cout = c[7];\nendmodule\n"
+ },
+ {
+  "name": "csa3",
+  "interface": "module csa3 (input [7:0] a, input [7:0] b, input [7:0] c, output [7:0] s, output [7:0] cy);",
+  "golden_rtl": "module csa3 (input [7:0] a, input [7:0] b, input [7:0] c, output [7:0] s, output [7:0] cy);\n  assign s  = a ^ b ^ c;\n  assign cy = (a & b) | (b & c) | (a & c);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b,c; wire [7:0] s,cy; reg [10:0] lhs,rhs; integer i,seed;\n  csa3 dut(.a(a),.b(b),.c(c),.s(s),.cy(cy));\n  initial begin\n    seed=109;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: begin a=8'hFF; b=8'hFF; c=8'hFF; end\n        1: begin a=8'h00; b=8'hFF; c=8'hFF; end\n        2: begin a=8'h55; b=8'hAA; c=8'hFF; end\n        default: begin a=$random(seed); b=$random(seed); c=$random(seed); end\n      endcase\n      #1;\n      lhs = a + b + c;\n      rhs = {3'b0,s} + ({3'b0,cy} << 1);\n      if(lhs !== rhs) begin $display(\"FAIL a=%0d b=%0d c=%0d s=%0d cy=%0d lhs=%0d rhs=%0d\",a,b,c,s,cy,lhs,rhs); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module csa3 (input [7:0] a, input [7:0] b, input [7:0] c, output [7:0] s, output [7:0] cy);\n  assign s  = a ^ b ^ c;\n  assign cy = (a & b) | (a & c);\nendmodule\n"
+ },
+ {
+  "name": "absval8",
+  "interface": "module absval8 (input signed [7:0] a, output [7:0] y);",
+  "golden_rtl": "module absval8 (input signed [7:0] a, output [7:0] y);\n  assign y = a[7] ? (~a + 1'b1) : a;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg signed [7:0] a; wire [7:0] y; reg signed [8:0] wa; reg [7:0] exp; integer i,seed;\n  absval8 dut(.a(a),.y(y));\n  initial begin\n    seed=113;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: a=-8'sd128;\n        1: a=-8'sd1;\n        2: a= 8'sd127;\n        3: a= 8'sd0;\n        default: a=$random(seed);\n      endcase\n      #1;\n      wa = a;\n      if(wa < 0) exp = -wa; else exp = wa;\n      if(y !== exp) begin $display(\"FAIL a=%0d y=%0d exp=%0d\",a,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module absval8 (input signed [7:0] a, output [7:0] y);\n  assign y = a[7] ? (~a) : a;\nendmodule\n"
+ },
+ {
+  "name": "satadd8u",
+  "interface": "module satadd8u (input [7:0] a, input [7:0] b, output [7:0] y);",
+  "golden_rtl": "module satadd8u (input [7:0] a, input [7:0] b, output [7:0] y);\n  wire [8:0] s = a + b;\n  assign y = s[8] ? 8'hFF : s[7:0];\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a,b; wire [7:0] y; reg [8:0] full; reg [7:0] exp; integer i,seed;\n  satadd8u dut(.a(a),.b(b),.y(y));\n  initial begin\n    seed=127;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: begin a=8'd255; b=8'd255; end\n        1: begin a=8'd200; b=8'd100; end\n        2: begin a=8'd1;   b=8'd2;   end\n        3: begin a=8'd255; b=8'd1;   end\n        default: begin a=$random(seed); b=$random(seed); end\n      endcase\n      #1;\n      full = {1'b0,a} + {1'b0,b};\n      exp = (full > 9'd255) ? 8'hFF : full[7:0];\n      if(y !== exp) begin $display(\"FAIL a=%0d b=%0d y=%0d exp=%0d\",a,b,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module satadd8u (input [7:0] a, input [7:0] b, output [7:0] y);\n  wire [8:0] s = a + b;\n  assign y = s[7:0];\nendmodule\n"
+ },
+ {
+  "name": "neg8",
+  "interface": "module neg8 (input [7:0] a, output [7:0] y);",
+  "golden_rtl": "module neg8 (input [7:0] a, output [7:0] y);\n  assign y = ~a + 1'b1;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] a; wire [7:0] y; reg [7:0] exp; integer i,seed;\n  neg8 dut(.a(a),.y(y));\n  initial begin\n    seed=131;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: a=8'd0;\n        1: a=8'd1;\n        2: a=8'd128;\n        3: a=8'd255;\n        default: a=$random(seed);\n      endcase\n      #1;\n      exp = 8'd0 - a;\n      if(y !== exp) begin $display(\"FAIL a=%0d y=%0d exp=%0d\",a,y,exp); $finish; end\n      if(((a + y) & 8'hFF) !== 8'd0) begin $display(\"FAIL sum-not-zero a=%0d y=%0d\",a,y); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module neg8 (input [7:0] a, output [7:0] y);\n  assign y = ~a;\nendmodule\n"
+ },
+ {
+  "name": "signext8to16",
+  "interface": "module signext8to16 (input signed [7:0] a, output [15:0] y);",
+  "golden_rtl": "module signext8to16 (input signed [7:0] a, output [15:0] y);\n  assign y = {{8{a[7]}}, a};\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg signed [7:0] a; wire [15:0] y; reg signed [15:0] exp; integer i,seed;\n  signext8to16 dut(.a(a),.y(y));\n  initial begin\n    seed=137;\n    for(i=0;i<3000;i=i+1) begin\n      case(i)\n        0: a=-8'sd128;\n        1: a=-8'sd1;\n        2: a= 8'sd127;\n        3: a= 8'sd0;\n        default: a=$random(seed);\n      endcase\n      #1;\n      exp = a;\n      if(y !== exp) begin $display(\"FAIL a=%0d y=%h exp=%h\",a,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module signext8to16 (input signed [7:0] a, output [15:0] y);\n  assign y = {8'b0, a};\nendmodule\n"
+ },
+ {
+  "name": "bcdadd",
+  "interface": "module bcdadd (input [3:0] a, input [3:0] b, input cin, output [3:0] s, output cout);",
+  "golden_rtl": "module bcdadd (input [3:0] a, input [3:0] b, input cin, output [3:0] s, output cout);\n  wire [4:0] bin = a + b + cin;\n  wire gt9 = (bin > 5'd9);\n  assign s = gt9 ? (bin + 5'd6) : bin;\n  assign cout = gt9;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [3:0] a,b; reg cin; wire [3:0] s; wire cout;\n  integer ta,tb_i,tc; integer total; reg [3:0] es; reg ec;\n  bcdadd dut(.a(a),.b(b),.cin(cin),.s(s),.cout(cout));\n  initial begin\n    for(ta=0;ta<10;ta=ta+1)\n      for(tb_i=0;tb_i<10;tb_i=tb_i+1)\n        for(tc=0;tc<2;tc=tc+1) begin\n          a=ta[3:0]; b=tb_i[3:0]; cin=tc[0];\n          #1;\n          total = ta + tb_i + tc;\n          ec = (total > 9);\n          es = ec ? (total - 10) : total;\n          if(s !== es || cout !== ec) begin $display(\"FAIL a=%0d b=%0d cin=%0d s=%0d cout=%0d exps=%0d expc=%0d\",a,b,cin,s,cout,es,ec); $finish; end\n          if(s > 4'd9) begin $display(\"FAIL non-BCD digit a=%0d b=%0d cin=%0d s=%0d\",a,b,cin,s); $finish; end\n        end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module bcdadd (input [3:0] a, input [3:0] b, input cin, output [3:0] s, output cout);\n  wire [4:0] bin = a + b + cin;\n  wire gt9 = (bin > 5'd9);\n  assign s = bin[3:0];\n  assign cout = gt9;\nendmodule\n"
+ }
+]

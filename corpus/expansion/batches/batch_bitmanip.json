@@ -1,0 +1,72 @@
+[
+ {
+  "name": "ffs8",
+  "interface": "module ffs8 (input [7:0] x, output [2:0] idx, output valid);",
+  "golden_rtl": "module ffs8 (input [7:0] x, output [2:0] idx, output valid);\n  assign valid = |x;\n  assign idx = x[0] ? 3'd0 : x[1] ? 3'd1 : x[2] ? 3'd2 : x[3] ? 3'd3 :\n               x[4] ? 3'd4 : x[5] ? 3'd5 : x[6] ? 3'd6 : 3'd7;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [2:0] idx; wire valid;\n  integer i,k,seed; reg exp_valid; integer exp_idx;\n  ffs8 dut(.x(x),.idx(idx),.valid(valid));\n  initial begin\n    seed=101;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp_valid = |x;\n      exp_idx = 0;\n      for(k=7;k>=0;k=k-1) if(x[k]) exp_idx = k;\n      if(valid !== exp_valid) begin $display(\"FAIL x=%b valid=%b exp=%b\",x,valid,exp_valid); $finish; end\n      if(exp_valid && (idx !== exp_idx[2:0])) begin $display(\"FAIL x=%b idx=%0d exp=%0d\",x,idx,exp_idx); $finish; end\n      if(exp_valid && (x[idx] !== 1'b1)) begin $display(\"FAIL x=%b idx=%0d not set\",x,idx); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module ffs8 (input [7:0] x, output [2:0] idx, output valid);\n  assign valid = |x;\n  assign idx = x[7] ? 3'd7 : x[6] ? 3'd6 : x[5] ? 3'd5 : x[4] ? 3'd4 :\n               x[3] ? 3'd3 : x[2] ? 3'd2 : x[1] ? 3'd1 : 3'd0;\nendmodule\n"
+ },
+ {
+  "name": "fls8",
+  "interface": "module fls8 (input [7:0] x, output [2:0] idx, output valid);",
+  "golden_rtl": "module fls8 (input [7:0] x, output [2:0] idx, output valid);\n  assign valid = |x;\n  assign idx = x[7] ? 3'd7 : x[6] ? 3'd6 : x[5] ? 3'd5 : x[4] ? 3'd4 :\n               x[3] ? 3'd3 : x[2] ? 3'd2 : x[1] ? 3'd1 : 3'd0;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [2:0] idx; wire valid;\n  integer i,k,seed; reg exp_valid; integer exp_idx;\n  fls8 dut(.x(x),.idx(idx),.valid(valid));\n  initial begin\n    seed=202;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp_valid = |x;\n      exp_idx = 0;\n      for(k=0;k<8;k=k+1) if(x[k]) exp_idx = k;\n      if(valid !== exp_valid) begin $display(\"FAIL x=%b valid=%b exp=%b\",x,valid,exp_valid); $finish; end\n      if(exp_valid && (idx !== exp_idx[2:0])) begin $display(\"FAIL x=%b idx=%0d exp=%0d\",x,idx,exp_idx); $finish; end\n      if(exp_valid && (x[idx] !== 1'b1)) begin $display(\"FAIL x=%b idx=%0d not set\",x,idx); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module fls8 (input [7:0] x, output [2:0] idx, output valid);\n  assign valid = |x;\n  assign idx = x[0] ? 3'd0 : x[1] ? 3'd1 : x[2] ? 3'd2 : x[3] ? 3'd3 :\n               x[4] ? 3'd4 : x[5] ? 3'd5 : x[6] ? 3'd6 : 3'd7;\nendmodule\n"
+ },
+ {
+  "name": "clz8",
+  "interface": "module clz8 (input [7:0] x, output [3:0] cnt);",
+  "golden_rtl": "module clz8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[7] ? 4'd0 : x[6] ? 4'd1 : x[5] ? 4'd2 : x[4] ? 4'd3 :\n               x[3] ? 4'd4 : x[2] ? 4'd5 : x[1] ? 4'd6 : x[0] ? 4'd7 : 4'd8;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [3:0] cnt; integer i,k,seed; reg [3:0] exp; reg foundf;\n  clz8 dut(.x(x),.cnt(cnt));\n  initial begin\n    seed=303;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp=4'd8; foundf=1'b0;\n      for(k=7;k>=0;k=k-1) if(x[k] && !foundf) begin exp = 7-k; foundf=1'b1; end\n      if(cnt !== exp) begin $display(\"FAIL x=%b cnt=%0d exp=%0d\",x,cnt,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module clz8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[7] ? 4'd0 : x[6] ? 4'd1 : x[5] ? 4'd2 : x[4] ? 4'd3 :\n               x[3] ? 4'd4 : x[2] ? 4'd5 : x[1] ? 4'd6 : x[0] ? 4'd7 : 4'd0;\nendmodule\n"
+ },
+ {
+  "name": "ctz8",
+  "interface": "module ctz8 (input [7:0] x, output [3:0] cnt);",
+  "golden_rtl": "module ctz8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[0] ? 4'd0 : x[1] ? 4'd1 : x[2] ? 4'd2 : x[3] ? 4'd3 :\n               x[4] ? 4'd4 : x[5] ? 4'd5 : x[6] ? 4'd6 : x[7] ? 4'd7 : 4'd8;\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [3:0] cnt; integer i,k,seed; reg [3:0] exp; reg foundf;\n  ctz8 dut(.x(x),.cnt(cnt));\n  initial begin\n    seed=404;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp=4'd8; foundf=1'b0;\n      for(k=0;k<8;k=k+1) if(x[k] && !foundf) begin exp = k; foundf=1'b1; end\n      if(cnt !== exp) begin $display(\"FAIL x=%b cnt=%0d exp=%0d\",x,cnt,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module ctz8 (input [7:0] x, output [3:0] cnt);\n  assign cnt = x[0] ? 4'd0 : x[1] ? 4'd1 : x[2] ? 4'd2 : x[3] ? 4'd3 :\n               x[4] ? 4'd4 : x[5] ? 4'd5 : x[6] ? 4'd6 : x[7] ? 4'd7 : 4'd0;\nendmodule\n"
+ },
+ {
+  "name": "revbits8",
+  "interface": "module revbits8 (input [7:0] x, output [7:0] y);",
+  "golden_rtl": "module revbits8 (input [7:0] x, output [7:0] y);\n  assign y = {x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7]};\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [7:0] y; integer i,k,seed; reg [7:0] exp;\n  revbits8 dut(.x(x),.y(y));\n  initial begin\n    seed=505;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      for(k=0;k<8;k=k+1) exp[k] = x[7-k];\n      if(y !== exp) begin $display(\"FAIL x=%b y=%b exp=%b\",x,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module revbits8 (input [7:0] x, output [7:0] y);\n  assign y = {x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[0]};\nendmodule\n"
+ },
+ {
+  "name": "byteswap16",
+  "interface": "module byteswap16 (input [15:0] din, output [15:0] dout);",
+  "golden_rtl": "module byteswap16 (input [15:0] din, output [15:0] dout);\n  assign dout = {din[7:0], din[15:8]};\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [15:0] din; wire [15:0] dout; integer i,seed; reg [15:0] exp;\n  byteswap16 dut(.din(din),.dout(dout));\n  initial begin\n    seed=606;\n    for(i=0;i<3000;i=i+1) begin\n      din=$random(seed);\n      #1;\n      exp = {din[7:0], din[15:8]};\n      if(dout !== exp) begin $display(\"FAIL din=%h dout=%h exp=%h\",din,dout,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module byteswap16 (input [15:0] din, output [15:0] dout);\n  assign dout = {din[15:8], din[7:0]};\nendmodule\n"
+ },
+ {
+  "name": "nibbleswap8",
+  "interface": "module nibbleswap8 (input [7:0] din, output [7:0] dout);",
+  "golden_rtl": "module nibbleswap8 (input [7:0] din, output [7:0] dout);\n  assign dout = {din[3:0], din[7:4]};\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] din; wire [7:0] dout; integer i,seed; reg [7:0] exp;\n  nibbleswap8 dut(.din(din),.dout(dout));\n  initial begin\n    seed=707;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) din=i[7:0]; else din=$random(seed);\n      #1;\n      exp = {din[3:0], din[7:4]};\n      if(dout !== exp) begin $display(\"FAIL din=%h dout=%h exp=%h\",din,dout,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module nibbleswap8 (input [7:0] din, output [7:0] dout);\n  assign dout = {din[7:4], din[3:0]};\nendmodule\n"
+ },
+ {
+  "name": "rotr8",
+  "interface": "module rotr8 (input [7:0] din, input [2:0] sh, output [7:0] dout);",
+  "golden_rtl": "module rotr8 (input [7:0] din, input [2:0] sh, output [7:0] dout);\n  assign dout = (din >> sh) | (din << (8 - sh));\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] din; reg [2:0] sh; wire [7:0] dout; integer i,k,seed; reg [7:0] exp;\n  rotr8 dut(.din(din),.sh(sh),.dout(dout));\n  initial begin\n    seed=808;\n    for(i=0;i<3000;i=i+1) begin\n      din=$random(seed); sh=$random(seed);\n      #1;\n      exp = din;\n      for(k=0;k<sh;k=k+1) exp = {exp[0], exp[7:1]};\n      if(dout !== exp) begin $display(\"FAIL din=%b sh=%0d dout=%b exp=%b\",din,sh,dout,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module rotr8 (input [7:0] din, input [2:0] sh, output [7:0] dout);\n  assign dout = din >> sh;\nendmodule\n"
+ },
+ {
+  "name": "isolate_lsb8",
+  "interface": "module isolate_lsb8 (input [7:0] x, output [7:0] y);",
+  "golden_rtl": "module isolate_lsb8 (input [7:0] x, output [7:0] y);\n  assign y = x & (~x + 8'd1);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [7:0] y; integer i,k,seed; reg [7:0] exp; reg foundf;\n  isolate_lsb8 dut(.x(x),.y(y));\n  initial begin\n    seed=909;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp=8'd0; foundf=1'b0;\n      for(k=0;k<8;k=k+1) if(x[k] && !foundf) begin exp = (8'd1<<k); foundf=1'b1; end\n      if(y !== exp) begin $display(\"FAIL x=%b y=%b exp=%b\",x,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module isolate_lsb8 (input [7:0] x, output [7:0] y);\n  assign y = x & (x - 8'd1);\nendmodule\n"
+ },
+ {
+  "name": "clear_lsb8",
+  "interface": "module clear_lsb8 (input [7:0] x, output [7:0] y);",
+  "golden_rtl": "module clear_lsb8 (input [7:0] x, output [7:0] y);\n  assign y = x & (x - 8'd1);\nendmodule\n",
+  "property_tb": "`timescale 1ns/1ps\nmodule tb;\n  reg [7:0] x; wire [7:0] y; integer i,k,seed; reg [7:0] exp; reg foundf;\n  clear_lsb8 dut(.x(x),.y(y));\n  initial begin\n    seed=1010;\n    for(i=0;i<3000;i=i+1) begin\n      if(i<256) x=i[7:0]; else x=$random(seed);\n      #1;\n      exp=x; foundf=1'b0;\n      for(k=0;k<8;k=k+1) if(x[k] && !foundf) begin exp = x & ~(8'd1<<k); foundf=1'b1; end\n      if(y !== exp) begin $display(\"FAIL x=%b y=%b exp=%b\",x,y,exp); $finish; end\n    end\n    $display(\"PASS\"); $finish;\n  end\n  initial begin #100000; $display(\"FAIL timeout\"); $finish; end\nendmodule\n",
+  "buggy_rtl": "module clear_lsb8 (input [7:0] x, output [7:0] y);\n  assign y = x & (x + 8'd1);\nendmodule\n"
+ }
+]

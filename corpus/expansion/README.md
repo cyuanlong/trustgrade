@@ -1,31 +1,40 @@
-# Expansion corpus — a second, fully public, independently-authored benchmark
+# Expansion corpus — a large, fully public, independently-authored benchmark
 
-30 new HDL objectives (plus the arbiter), authored for this repository and
-**freely redistributable** (unlike the course-derived primary corpus, which
-releases on acceptance). Each objective is construction-based ground truth:
+**130 new HDL objectives** across **14 design classes**, authored for this
+repository and **freely redistributable** (unlike the course-derived primary
+corpus, which releases on acceptance). Each objective is construction-based
+ground truth:
 
 - `golden_rtl` — a correct reference implementation
 - `property_tb` — a self-checking property testbench asserting spec-level
   invariants (prints `PASS` / `FAIL …`, with a timeout)
 - `buggy_rtl` — the same module with one realistic functional bug
 - every objective is verified end-to-end with Icarus Verilog: golden → ACCEPT,
-  buggy → REJECT (`python verify_obj.py batches/<file>.json`)
+  buggy → REJECT (`python verify_obj.py batches/<file>.json`) — 130/130 pass
 
 The recovered harness (`../../experiment/corpus_run.py`) additionally, per
 objective, generates alpha-equivalence-verified valid variants and
-oracle-confirmed injected mutants, giving the full valid/buggy classes.
+oracle-confirmed injected mutants, giving the full valid/buggy classes:
+**131 objectives → 664 submissions** (402 valid incl. 272 alternatives; 262 buggy).
 
-## Composition (30 objectives, 4 design classes)
+## Composition (130 objectives, 14 design classes)
 
-| Class | n | file | examples |
-|---|---|---|---|
-| Combinational | 8 | `batches/batch_comb.json` | ripple-carry adder, 4:1 mux, priority encoder, barrel rotate, bin↔gray, popcount |
-| Sequential | 8 | `batches/batch_seq.json` | up/down counter, mod-10, SIPO shift, LFSR, edge detector, ring/Johnson/gray counters |
-| FSM / protocol | 7 | `batches/batch_fsm.json` | "1011" detector, req/ack handshake, traffic light, UART-TX, LIFO, sync FIFO, vending |
-| Datapath / CDC | 7 | `batches/batch_cdc.json` | 2-flop bus synchronizer, bit-reverse, ÷6 tick, accumulator, saturating MAC, running-max, gray counter |
-
-Built out to full classes by the harness: **31 objectives, 152 submissions**
-(88 valid incl. 58 alternatives; 64 buggy).
+| Class | n | file |
+|---|---|---|
+| Combinational | 8 | `batches/batch_comb.json` |
+| Sequential | 8 | `batches/batch_seq.json` |
+| FSM / protocol | 7 | `batches/batch_fsm.json` |
+| Datapath / CDC | 7 | `batches/batch_cdc.json` |
+| Arithmetic (multipliers, dividers, CLA/CSA, BCD, saturating) | 10 | `batches/batch_arith.json` |
+| Memory (register file, RAM, FIFO-8, stack, CAM, circular buffer) | 10 | `batches/batch_mem.json` |
+| Bus / serial protocol (UART-rx, SPI, skid, serializer, credit) | 10 | `batches/batch_proto.json` |
+| DSP / datapath (FIR, MAC, integrator, comb, dot-product) | 10 | `batches/batch_dsp.json` |
+| Coding / ECC (parity, Hamming(7,4) enc/dec, CRC-8, checksum) | 10 | `batches/batch_ecc.json` |
+| Bit manipulation (ffs/fls, clz/ctz, reverse, rotate, isolate-lsb) | 10 | `batches/batch_bitmanip.json` |
+| Advanced FSM (detectors, elevator, combo-lock, debounce) | 10 | `batches/batch_fsm2.json` |
+| Advanced sequential (PWM, timers, watchdog, BCD chain) | 10 | `batches/batch_seq2.json` |
+| CDC / synchronizers (3-flop, pulse/toggle sync, handshake, MCP) | 10 | `batches/batch_cdc2.json` |
+| ALU / control (8-op ALU, flags, shifter, cond-eval, bit-field) | 10 | `batches/batch_alu.json` |
 
 ## Reproduce
 
@@ -40,44 +49,35 @@ python ../corpus/expansion/expansion_stats.py   # Wilson CIs + Fisher vs propert
 
 ## Result (see `RESULTS.txt` for the full run)
 
-The primary corpus's findings replicate on this independent benchmark:
+The primary corpus's findings replicate at scale on this independent benchmark
+(131 objectives, 664 submissions).
 
-| Grader | FNR valid (n=88) | FPR buggy (n=64) | Fisher vs property |
-|---|---|---|---|
-| Property (ours) | 0/88 | 2/64 | — |
-| Reference-output match | 1/88 | 3/64 | p=1.00 |
-| Token similarity | 1/88 | 64/64 | p=9.1e-13 |
-| Structural similarity | 1/88 | 62/64 | p=9.5e-13 |
+### Graders
 
-Backbone (full execution gate): sound-verdict accuracy **149/149**, buggy caught
-62/64, valid delivered 87/88, 3 escalated to a human (the 2 property-evading
-`const+1` mutants + 1 legitimate alternative — escalated, never falsely
-accepted). Similarity grading again accepts essentially every buggy submission
-at any threshold; the property grader's only residual is the property-coverage
-gap the differential layer is designed to close.
+| Grader | FNR valid (n=402) | FNR alternatives (n=272) | FPR buggy (n=262) | Fisher vs property |
+|---|---|---|---|---|
+| Property (ours) | **0/402** | **0/272** | 9/262 | — |
+| Reference-output match | 1/402 | 1/272 | 16/262 | p=0.22 |
+| Token similarity | 9/402 | 9/272 | 260/262 | p=1.8e-12 |
+| Structural similarity | 1/402 | 1/272 | 255/262 | p=9.7e-13 |
 
-## Full six-arm gate comparison (all three paid LLM arms actually run)
+The property grader falsely rejects **0 of 402** valid submissions (including all
+272 structurally-distinct alternatives); similarity grading accepts 255–260 of
+262 buggy submissions — unsafe at any threshold. The property grader's only
+residual is 9 `const+1` mutants that evade the property set (the R(Φ,∅) class).
 
-Framed as a faulty-feedback corpus — 152 proposed "fixes" (88 valid OK, 64 broken
-incl. 2 property-evaders) — and judged by all six paradigms. The DeepSeek review
-and simulated-student arms were run against the public API; the frontier-review
-arm was run by Claude reviewers doing static review only (no execution). Scored
-by `score_expansion.py`; verdicts archived under `arms/`.
+### Backbone / execution gate (deterministic, free)
 
-| Gating condition | Catch broken (64) | Pass valid (88) | Evaders (2) | Harmful delivered | McNemar vs full |
-|---|---|---|---|---|---|
-| Ungated | 0/64 | 88/88 | 0/2 | 64 | b=64,c=1, p=3.6e-18 |
-| Simulated student | 16/64 | 66/88 | 1/2 | 48 | b=70,c=1, p=6.1e-20 |
-| Affordable review (DeepSeek) | 51/64 | 83/88 | 1/2 | 13 | b=18,c=1, p=7.6e-05 |
-| Frontier review (Claude) | 61/64 | 88/88 | 0/2 | 3 | b=3,c=1, **p=0.62** |
-| Test-only execution | 62/64 | 88/88 | 0/2 | 2 | b=2,c=1, p=1.0 |
-| **Full execution gate (ours)** | **64/64** | 87/88 | **2/2** | **0** | — |
+- Backbone sound-verdict accuracy **654/656**; valid delivered 401/402; buggy
+  caught 253/262 by sound layers; 8 escalated to a human (never falsely accepted).
+- Full execution gate on the 664-item gate corpus: catches **260/262** broken
+  fixes, **7 of 9** property-evaders via the L2 differential layer, passes
+  401/402 valid, delivers only **2** harmful (the residual R(Φ,H) that evades
+  both the property set and the auto-generated differential harness).
+- Test-only gate: 253/262, **0/9** evaders, 9 harmful. Ungated: 0/262, 262 harmful.
 
-The primary corpus's ordering replicates on this independent, fully-public
-benchmark: the full gate delivers **zero** harmful fixes and catches both
-property-evaders via the L2 differential layer; it is statistically
-indistinguishable from frontier review (p=0.62) while being deterministic and
-free, and significantly safer than affordable review, the simulated-student
-paradigm, and ungated delivery (all p ≤ 8e-5). Reproduce the LLM arms with
-`DEEPSEEK_API_KEY=... python run_ds_arms_expansion.py` (the key is read from the
-environment and never stored).
+The paid LLM arms (DeepSeek review + simulated student, Claude frontier review)
+were run in full on the earlier 152-item gate corpus (see git history / the
+`arms/` verdicts) and can be re-run at this scale with
+`DEEPSEEK_API_KEY=... python run_ds_arms_expansion.py` (key read from env, never
+stored) plus the frontier-review batches.
